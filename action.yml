@@ -1,0 +1,50 @@
+name: 'commit-gauge'
+description: 'Lint commit messages in a push or pull request against Conventional Commits, with fix-up suggestions'
+author: 'Louis Wright'
+branding: { icon: 'git-commit', color: 'blue' }
+inputs:
+  path: { description: 'Project directory (default: repository root)', default: '.' }
+  from: { description: 'Base ref (default: PR base SHA or the push before SHA)', default: '${{ github.event.pull_request.base.sha || github.event.before }}' }
+  to: { description: 'Head ref (default: HEAD)', default: 'HEAD' }
+  fail-on: { description: 'critical | high | medium | low | info | none', default: 'high' }
+  config: { description: 'Path to JSON config file', default: '' }
+  sarif: { description: 'Write SARIF to this path', default: '' }
+  json: { description: 'Write JSON report to this path', default: '' }
+  job-summary: { description: 'Write the Markdown report to the job summary (true/false)', default: 'true' }
+  args: { description: 'Extra CLI arguments', default: '' }
+outputs:
+  markdown-file: { description: 'Path of the Markdown report', value: '${{ steps.run.outputs.markdown-file }}' }
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with: { node-version: '20' }
+    - id: run
+      shell: bash
+      env:
+        CG_PATH: ${{ inputs.path }}
+        CG_FROM: ${{ inputs.from }}
+        CG_TO: ${{ inputs.to }}
+        CG_FAIL_ON: ${{ inputs.fail-on }}
+        CG_CONFIG: ${{ inputs.config }}
+        CG_SARIF: ${{ inputs.sarif }}
+        CG_JSON: ${{ inputs.json }}
+        CG_SUMMARY: ${{ inputs.job-summary }}
+        CG_ARGS: ${{ inputs.args }}
+        CG_BIN: ${{ github.action_path }}/bin/commit-gauge.js
+      run: |
+        md="$RUNNER_TEMP/commit-gauge.md"
+        args=("$CG_PATH" --fail-on "$CG_FAIL_ON" --markdown "$md")
+        [ -n "$CG_FROM" ] && args+=(--from "$CG_FROM")
+        [ -n "$CG_TO" ] && args+=(--to "$CG_TO")
+        [ -n "$CG_CONFIG" ] && args+=(--config "$CG_CONFIG")
+        [ -n "$CG_SARIF" ] && args+=(--sarif "$CG_SARIF")
+        [ -n "$CG_JSON" ] && args+=(--json "$CG_JSON")
+        set +e
+        # shellcheck disable=SC2086
+        node "$CG_BIN" "${args[@]}" $CG_ARGS
+        code=$?
+        set -e
+        echo "markdown-file=$md" >> "$GITHUB_OUTPUT"
+        if [ "$CG_SUMMARY" = "true" ] && [ -f "$md" ]; then cat "$md" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit $code

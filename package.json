@@ -1,0 +1,54 @@
+{
+  "name": "commit-gauge",
+  "version": "1.0.0",
+  "description": "Lightweight Conventional Commits linter for git hooks and CI: lints a message, a file, stdin or a commit range, explains every problem and suggests a corrected header. Configurable types/scopes, sign-off and issue rules, hook installer. Text/JSON/SARIF/Markdown, allowlist with expiry, GitHub Action. Zero deps.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "commit-gauge": "bin/commit-gauge.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "action.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "conventional-commits",
+    "commitlint",
+    "commit-message",
+    "git",
+    "git-hooks",
+    "commit-msg",
+    "lint",
+    "sarif",
+    "cli",
+    "github-action"
+  ],
+  "author": "Louis Wright <hello@louiswright.co.uk> (https://github.com/MrLouisWright)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLouisWright/commit-gauge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLouisWright/commit-gauge/issues"
+  },
+  "homepage": "https://github.com/MrLouisWright/commit-gauge#readme"
+}
