@@ -1,5 +1,7 @@
 # commit-gauge
 
+[![npm version](https://img.shields.io/npm/v/commit-gauge.svg)](https://www.npmjs.com/package/commit-gauge) [![CI](https://github.com/MrLouisWright/commit-gauge/actions/workflows/ci.yml/badge.svg)](https://github.com/MrLouisWright/commit-gauge/actions/workflows/ci.yml) [![Node](https://img.shields.io/node/v/commit-gauge.svg)](https://nodejs.org) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > A lightweight Conventional Commits linter for git hooks and CI, with clear fix-up suggestions.
 
 `commit-gauge` checks commit messages against [Conventional Commits](https://www.conventionalcommits.org/). It tells you what's wrong and also what to write instead. `Fixed the Login bug.` gets the suggestion `fix: fix the Login bug`, and `feature(API): Added new endpoint.` gets `feat(api): add new endpoint`. Use it as a `commit-msg` hook, on a single message, or on every commit in a pull request.
