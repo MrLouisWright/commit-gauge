@@ -3,12 +3,29 @@
   "version": "1.0.0",
   "description": "Lightweight Conventional Commits linter for git hooks and CI: lints a message, a file, stdin or a commit range, explains every problem and suggests a corrected header. Configurable types/scopes, sign-off and issue rules, hook installer. Text/JSON/SARIF/Markdown, allowlist with expiry, GitHub Action. Zero deps.",
   "type": "module",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.d.ts",
-      "default": "./src/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./parser": {
+      "import": {
+        "types": "./dist/parser.d.ts",
+        "default": "./dist/parser.js"
+      },
+      "require": {
+        "types": "./dist/parser.d.cts",
+        "default": "./dist/parser.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -16,6 +33,7 @@
     "commit-gauge": "bin/commit-gauge.js"
   },
   "files": [
+    "dist",
     "src",
     "bin",
     "action.yml",
@@ -27,7 +45,10 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "build": "node scripts/build.mjs",
+    "pretest": "npm run build",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "conventional-commits",
@@ -54,5 +75,9 @@
   "bugs": {
     "url": "https://github.com/MrLouisWright/commit-gauge/issues"
   },
-  "homepage": "https://mrlouiswright.github.io/commit-gauge/"
+  "homepage": "https://mrlouiswright.github.io/commit-gauge/",
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.2"
+  }
 }

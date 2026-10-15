@@ -1,6 +1,6 @@
 // Conventional Commits linting for one message.
-export const DEFAULT_TYPES = ['feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'build', 'ci', 'chore', 'revert'];
-const HEADER = /^(?<type>[^\s():!]+)(?:\((?<scope>[^()]*)\))?(?<bang>!)?(?<colon>:)(?<space>\s*)(?<subject>.*)$/;
+import { DEFAULT_TYPES, parseHeader } from './parser.js';
+export { DEFAULT_TYPES, parseHeader };
 const PAST = { added: 'add', adds: 'add', adding: 'add', fixed: 'fix', fixes: 'fix', fixing: 'fix', updated: 'update', updates: 'update', updating: 'update', removed: 'remove', removes: 'remove', removing: 'remove', changed: 'change', changes: 'change', changing: 'change', improved: 'improve', improves: 'improve', refactored: 'refactor', refactors: 'refactor', renamed: 'rename', renames: 'rename', moved: 'move', moves: 'move', deleted: 'delete', deletes: 'delete', created: 'create', creates: 'create', implemented: 'implement', implements: 'implement', bumped: 'bump', bumps: 'bump', upgraded: 'upgrade', upgrades: 'upgrade', made: 'make', makes: 'make', cleaned: 'clean', cleans: 'clean', merged: 'merge', replaced: 'replace', replaces: 'replace', converted: 'convert', allowed: 'allow', allows: 'allow', enabled: 'enable', enables: 'enable', disabled: 'disable', disables: 'disable', introduced: 'introduce', introduces: 'introduce', supported: 'support', supports: 'support', documented: 'document', documents: 'document', tested: 'test', reverted: 'revert', reverts: 'revert', prevented: 'prevent', prevents: 'prevent', handled: 'handle', handles: 'handle', ensured: 'ensure', ensures: 'ensure', used: 'use', uses: 'use', extracted: 'extract', simplified: 'simplify', simplifies: 'simplify', optimized: 'optimize', optimised: 'optimise', corrected: 'correct', corrects: 'correct', resolved: 'resolve', resolves: 'resolve' };
 const ALIASES = { feature: 'feat', features: 'feat', feats: 'feat', new: 'feat', add: 'feat', added: 'feat', fixed: 'fix', fixes: 'fix', bugfix: 'fix', bug: 'fix', hotfix: 'fix', patch: 'fix', doc: 'docs', documentation: 'docs', readme: 'docs', tests: 'test', testing: 'test', refactoring: 'refactor', refactored: 'refactor', performance: 'perf', chores: 'chore', deps: 'chore', dep: 'chore', dependencies: 'chore', release: 'chore', cleanup: 'chore', formatting: 'style', format: 'style', lint: 'style', builds: 'build', ci_cd: 'ci', reverted: 'revert', update: 'chore', upgrade: 'chore', bump: 'chore' };
 
@@ -42,7 +42,6 @@ export function fixSubject(subject, { subjectCase = 'lower' } = {}) {
   return s;
 }
 
-export const parseHeader = (header) => HEADER.exec(header)?.groups || null;
 
 /** Lint one commit message. Returns { findings: [{rule, message, fix, line}], suggestion, parsed } */
 export function lintMessage(raw, cfg = {}) {

@@ -4,7 +4,11 @@ import { execFileSync } from 'node:child_process';
 import { lintMessage, closestType, inferType, fixSubject, parseHeader, DEFAULT_TYPES } from './lint.js';
 import { buildReport, UsageError } from './core.js';
 
-export { lintMessage, closestType, inferType, fixSubject, parseHeader, DEFAULT_TYPES };
+import { parseCommit, cleanMessage, releaseType, formatCommit } from './parser.js';
+export { lintMessage, closestType, inferType, fixSubject, parseHeader, DEFAULT_TYPES, parseCommit, cleanMessage, releaseType, formatCommit };
+export { fromCommitlint, findCommitlintConfig, KNOWN_PRESETS, COMMITLINT_FILES } from './commitlint.js';
+export { loadPreset, normalizePreset, DEFAULT_PRESET } from './preset.js';
+export { prompt } from './prompt.js';
 export * from './core.js';
 
 export const RULES = {
@@ -60,12 +64,15 @@ export function check(dir, opts = {}, config = {}, configFile) {
   const cfg = { ...config, ...Object.fromEntries(Object.entries(opts.lint || {}).filter(([, v]) => v !== undefined)) };
   let commits;
   if (opts.message != null) commits = [{ message: opts.message, source: opts.source }];
+  else if (opts.prTitle != null && !opts.from) commits = [];
   else commits = commitsInRange(dir, opts.from, opts.to);
+  // squash merges use the PR title as the final commit header, so lint it like one
+  if (opts.prTitle != null) commits = [{ message: opts.prTitle, source: 'PR title', title: true }, ...commits];
   const { findings, results } = lintCommits(commits, cfg);
   const tool = { name: 'commit-gauge', version: opts.toolVersion || '1.0.0', rules: RULES, emoji: '📝', defaultFile: opts.source || '.git/COMMIT_EDITMSG' };
   const linted = results.filter((r) => !r.ignored).length;
   const bad = results.filter((r) => r.findings.length).length;
-  const target = opts.message != null ? (opts.source || 'commit message') : `${opts.from && !ZERO.test(opts.from) ? opts.from.slice(0, 12) + '..' : ''}${opts.to || 'HEAD'}`;
+  const target = opts.prTitle != null && !opts.from ? 'PR title' : opts.message != null ? (opts.source || 'commit message') : `${opts.from && !ZERO.test(opts.from) ? opts.from.slice(0, 12) + '..' : ''}${opts.to || 'HEAD'}`;
   const report = buildReport(tool, target, findings, config, { now: opts.now, configFile, summaryLine: `${linted} commit(s) linted, ${bad} with problems${results.length - linted ? `, ${results.length - linted} skipped (merge/revert/release)` : ''}`, commits: results });
   return report;
 }
@@ -84,4 +91,17 @@ export function installHook(dir, { force = false, command = 'npx --no -- commit-
   writeFileSync(file, `#!/bin/sh\n# installed by commit-gauge\n${command}\n`);
   chmodSync(file, 0o755);
   return { file, changed: true };
+}
+
+/**
+ * Read a GitHub pull_request event (GITHUB_EVENT_PATH) and return { title, from, to } for linting
+ * the PR title and every commit in the PR.
+ * @param {string} [eventPath]
+ */
+export function githubPullRequest(eventPath = process.env.GITHUB_EVENT_PATH) {
+  if (!eventPath || !existsSync(eventPath)) throw new UsageError('No GitHub event file (GITHUB_EVENT_PATH); --github-pr only works in a pull_request workflow');
+  const ev = JSON.parse(readFileSync(eventPath, 'utf8'));
+  const pr = ev.pull_request;
+  if (!pr) throw new UsageError('The GitHub event is not a pull_request event');
+  return { title: pr.title, from: pr.base?.sha, to: pr.head?.sha || 'HEAD', number: pr.number };
 }

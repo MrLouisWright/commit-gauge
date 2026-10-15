@@ -6,6 +6,7 @@ inputs:
   path: { description: 'Project directory (default: repository root)', default: '.' }
   from: { description: 'Base ref (default: PR base SHA or the push before SHA)', default: '${{ github.event.pull_request.base.sha || github.event.before }}' }
   to: { description: 'Head ref (default: HEAD)', default: 'HEAD' }
+  pr-title: { description: 'PR title to lint as the squash-merge header (default: the pull request title; empty to skip)', default: '${{ github.event.pull_request.title }}' }
   fail-on: { description: 'critical | high | medium | low | info | none', default: 'high' }
   config: { description: 'Path to JSON config file', default: '' }
   sarif: { description: 'Write SARIF to this path', default: '' }
@@ -25,6 +26,7 @@ runs:
         CG_PATH: ${{ inputs.path }}
         CG_FROM: ${{ inputs.from }}
         CG_TO: ${{ inputs.to }}
+        CG_PR_TITLE: ${{ inputs.pr-title }}
         CG_FAIL_ON: ${{ inputs.fail-on }}
         CG_CONFIG: ${{ inputs.config }}
         CG_SARIF: ${{ inputs.sarif }}
@@ -37,6 +39,7 @@ runs:
         args=("$CG_PATH" --fail-on "$CG_FAIL_ON" --markdown "$md")
         [ -n "$CG_FROM" ] && args+=(--from "$CG_FROM")
         [ -n "$CG_TO" ] && args+=(--to "$CG_TO")
+        [ -n "$CG_PR_TITLE" ] && args+=(--pr-title "$CG_PR_TITLE")
         [ -n "$CG_CONFIG" ] && args+=(--config "$CG_CONFIG")
         [ -n "$CG_SARIF" ] && args+=(--sarif "$CG_SARIF")
         [ -n "$CG_JSON" ] && args+=(--json "$CG_JSON")

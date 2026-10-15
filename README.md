@@ -17,6 +17,24 @@ CLI, library and GitHub Action. Node.js 18+, **zero runtime dependencies** (comm
 - **Hook installer:** `commit-gauge --install-hook` writes `.husky/commit-msg` if Husky is set up, otherwise `.git/hooks/commit-msg`.
 - **Output:** text, JSON, SARIF 2.1.0 and Markdown; `--fail-on`; exit codes 0/1/2; allowlist entries with expiry dates.
 
+## Parser, commitlint configs, PR titles and the prompt
+
+```js
+import { parseCommit, releaseType } from 'commit-gauge/parser';   // or require('commit-gauge/parser')
+parseCommit('feat(api)!: add tokens\n\nBREAKING CHANGE: keys removed');
+// { type: 'feat', scopes: ['api'], breaking: true, breakingNotes: ['keys removed'], footers: [...], ... }
+```
+
+- **Switching from commitlint?** Keep your `commitlint.config.js` / `.commitlintrc`; commit-gauge reads it (including `extends: ['@commitlint/config-conventional']`).
+- **Squash merges:** `commit-gauge --pr-title "$TITLE"` or, in a `pull_request` workflow, `commit-gauge --github-pr` (title + every commit).
+- **Presets:** `{ "extends": "./commit-preset.json" }` in `.commit-gauge.json`, where the preset lists `types` (with descriptions), `scopes` and lint options.
+- **Prompt:** `commit-gauge prompt --commit` asks for type, scope, subject, body, breaking change and issues, then commits a valid message.
+
+### Module formats and types
+
+Ships **ESM and CommonJS** (`import` and `require` both work, via `exports`), with TypeScript declarations generated from the source at build time. Tests run on Node 18/20/22 in GitHub Actions (`test/`), including require/import checks against the packed tarball; releases are published with npm provenance.
+
+
 ## Rules
 
 | Rule | Default severity | What it catches |
