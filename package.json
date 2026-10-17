@@ -1,6 +1,6 @@
 {
   "name": "commit-gauge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lightweight Conventional Commits linter for git hooks and CI: lints a message, a file, stdin or a commit range, explains every problem and suggests a corrected header. Configurable types/scopes, sign-off and issue rules, hook installer. Text/JSON/SARIF/Markdown, allowlist with expiry, GitHub Action. Zero deps.",
   "type": "module",
   "main": "./dist/index.cjs",
