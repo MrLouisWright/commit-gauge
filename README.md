@@ -93,9 +93,12 @@ LOW      subject starts with an uppercase letter ("Added") [subject-case]
 ## Options
 
 ```text
-commit-gauge 1.0.0 — lint commit messages against Conventional Commits, with fix-up suggestions
+commit-gauge 1.1.0 — lint commit messages against Conventional Commits, with fix-up suggestions
 
 Usage: commit-gauge [dir] [--message <msg> | --edit [file] | --file <file> | --stdin | --from <ref> --to <ref>] [options]
+       commit-gauge --pr-title <title> [--from <base> --to <head>]   lint a PR title (+ its commits)
+       commit-gauge --github-pr                 in a pull_request workflow: PR title + every PR commit
+       commit-gauge prompt [--preset <ref>] [--commit | --edit <file>]   interactive commit message builder
        commit-gauge --install-hook [--force]
 
 Input (default: the last commit)
@@ -113,6 +116,12 @@ Rules
       --require-signoff     Require a Signed-off-by trailer
       --issue-pattern <re>  Require an issue reference matching this regex
       --no-merges-ignored   Also lint merge commits
+Pull requests
+      --pr-title <title>    Lint a PR title as a squash-merge header (alone, or with --from/--to)
+      --github-pr           Read the PR title and base/head SHAs from GITHUB_EVENT_PATH
+Config
+      --preset <ref>        Shareable preset (file or package); also "extends" in .commit-gauge.json
+      --no-commitlint       Ignore commitlint.config.* / .commitlintrc* / package.json "commitlint"
 Hooks
       --install-hook        Write a commit-msg hook (.husky/commit-msg if husky is set up, else .git/hooks)
 
